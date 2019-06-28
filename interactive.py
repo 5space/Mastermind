@@ -17,12 +17,14 @@ root.geometry("640x640+0+0")
 heading = Label(root,
                 text="WELCOME TO THE MASTERMIND GAME BY JASON AND HOLDEN",
                 font=("arial", 20, "bold"),
-                fg="steelblue").pack()
+                fg="steelblue")
+heading.pack()
 
 label1 = Label(root,
                text="Enter your color guesses: ",
                font=("arial", 20, "bold"),
-               fg="black").pack()
+               fg="black")
+label1.pack()
 
 guess1 = StringVar()
 guess2 = StringVar()
