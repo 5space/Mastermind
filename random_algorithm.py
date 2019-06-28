@@ -11,11 +11,11 @@ def start_game(gametype):
 
     while len(remaining) > 1:
         attempt = random.choice(remaining)
-        print(f"Trying {attempt}")
+        print(f"Trying {str().join(map(str, attempt))}")
 
-        hint = get_hint(code, attempt, gametype)
+        hint = get_hint(code, attempt, range(gametype[0]))
         for k in remaining.copy():
-            if get_hint(k, attempt, gametype) != hint:
+            if get_hint(k, attempt, range(gametype[0])) != hint:
                 remaining.remove(k)
         print(f"Result: {hint}, {len(remaining)} possibilities remaining")
         moves += 1
@@ -25,4 +25,4 @@ def start_game(gametype):
 
 
 if __name__ == "__main__":
-    start_game((6, 4))
+    start_game((2, 15))
