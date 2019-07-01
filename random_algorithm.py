@@ -5,24 +5,23 @@ from util import get_hint
 
 def start_game(gametype):
 
-    remaining = list(itertools.product(*[range(gametype[0]) for t in range(gametype[1])]))
+    remaining = list(itertools.product(*[range(gametype[0]) for _ in range(gametype[1])]))
     code = random.choice(remaining)
-    moves = 0
+    moves = 1
 
-    while len(remaining) > 1:
+    while True:
         attempt = random.choice(remaining)
-        print(f"Trying {str().join(map(str, attempt))}")
 
         hint = get_hint(code, attempt, range(gametype[0]))
+        if hint == (gametype[1], 0):
+            return code, moves
         for k in remaining.copy():
             if get_hint(k, attempt, range(gametype[0])) != hint:
                 remaining.remove(k)
-        print(f"Result: {hint}, {len(remaining)} possibilities remaining")
         moves += 1
-
-    print(f"Code: {code}")
-    print(f"Found in {moves} moves")
 
 
 if __name__ == "__main__":
-    start_game((2, 15))
+    code, moves = start_game((6, 4))
+    print(f"Code: {code}")
+    print(f"Found in {moves} moves")
