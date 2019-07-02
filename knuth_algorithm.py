@@ -1,71 +1,70 @@
 import random
 import itertools
-from util import get_hint
+from util import Mastermind
 
 
-def minimal_value_single_knuth(remaining, attempt, gametype):
-    hints = {}
-    for code in remaining:
-        hint = get_hint(code, attempt, range(gametype[0]))
-        if hint not in hints:
-            hints[hint] = 1
-        else:
-            hints[hint] += 1
-    return max(hints.values())
+class KnuthAlgorithm(Mastermind):
 
+    def __init__(self, colors=6, pegs=4):
+        super().__init__(colors, pegs)
+        self.combinations = list(itertools.product(*[range(self.colors) for _ in range(self.pegs)]))
+        self.remaining = self.combinations.copy()
 
-def minimal_value_knuth(remaining, gametype):
+    def minimal_value_single_knuth(self, attempt):
+        hints = {}
+        for code in self.remaining:
+            hint = self.compare(code, attempt)
+            if hint not in hints:
+                hints[hint] = 1
+            else:
+                hints[hint] += 1
+        return max(hints.values())
 
-    scores = {}
-    possibilities = list(itertools.product(*[range(gametype[0]) for _ in range(gametype[1])]))
-    for attempt in possibilities:
-        scores[attempt] = minimal_value_single_knuth(remaining, attempt, gametype)
+    def minimal_value_knuth(self):
 
-    minimum = min(scores.values())
-    guesses = []
-    for attempt in scores:
-        if scores[attempt] == minimum:
-            guesses.append(attempt)
-    return sorted(guesses)
+        scores = {}
+        for attempt in self.combinations:
+            scores[attempt] = self.minimal_value_single_knuth(attempt)
 
+        minimum = min(scores.values())
+        guesses = []
+        for attempt in scores:
+            if scores[attempt] == minimum:
+                guesses.append(attempt)
+        return sorted(guesses)
 
-def get_all_hints(gametype):
-    for a in range(gametype[1]+1):
-        for b in range(gametype[1]+1-a):
-            yield (a, b)
+    def start_game(self, code=None):
 
+        self.remaining = list(itertools.product(*[range(self.colors) for _ in range(self.pegs)]))
 
-def start_game(gametype, c=None):
+        code = code or random.choice(self.remaining)
+        moves = 1
 
-    remaining = list(itertools.product(*[range(gametype[0]) for _ in range(gametype[1])]))
-    code = c or random.choice(remaining)
-    moves = 1
-
-    attempt = (0, 0, 1, 1)
-    while True:
-        hint = get_hint(code, attempt, range(gametype[0]))
-        if hint == (gametype[1], 0):
-            return code, moves
-        remaining = [k for k in remaining if get_hint(k, attempt, range(gametype[0])) == hint]
-        moves += 1
-        attempt = None
-        options = minimal_value_knuth(remaining, gametype)
-        for k in options:
-            if k in remaining:
-                attempt = k
-                break
-        if attempt is None:
-            attempt = options[0]
+        attempt = (0, 0, 1, 1)
+        while True:
+            hint = self.compare(code, attempt)
+            if hint == (self.pegs, 0):
+                return code, moves
+            self.remaining = [k for k in self.remaining if self.compare(k, attempt) == hint]
+            moves += 1
+            attempt = None
+            options = self.minimal_value_knuth()
+            for k in options:
+                if k in self.remaining:
+                    attempt = k
+                    break
+            if attempt is None:
+                attempt = options[0]
 
 
 total = 0
 count = 0
 if __name__ == "__main__":
-    gametype = (6, 4)
-    codes = list(itertools.product(*[range(gametype[0]) for _ in range(gametype[1])]))
-    for code in codes:
-        _, moves = start_game(gametype, code)
+    game = KnuthAlgorithm(6, 4)
+    codes = list(itertools.product(*[range(4, 6) for _ in range(4)]))
+    for c in codes:
+        _, moves = game.start_game(c)
         total += moves
         count += 1
-        print(f"{''.join(map(str, code))} found in {moves} moves")
+        print(f"{''.join(map(str, c))} found in {moves} moves")
 print(total/count)
