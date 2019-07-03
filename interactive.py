@@ -1,6 +1,12 @@
 from tkinter import *
 import random
-from util import get_hint
+
+
+def get_hint(code, attempt, choices):
+    correct = sum(1 for i in range(len(code)) if code[i] == attempt[i])
+    wrong = sum(min(code.count(n), attempt.count(n)) for n in choices) - correct
+    return correct, wrong
+
 
 colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Violet"]
 
@@ -39,7 +45,10 @@ m4 = OptionMenu(root, guess4, *colors)
 m4.config(width=20)
 m4.pack()
 
-generatedCode = [random.choice(colors), random.choice(colors), random.choice(colors), random.choice(colors)]
+generatedCode = [random.choice(colors),
+                 random.choice(colors),
+                 random.choice(colors),
+                 random.choice(colors)]
 moves = 0
 
 label2 = Label(root,

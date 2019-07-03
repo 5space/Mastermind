@@ -33,19 +33,19 @@ class KnuthAlgorithm(Mastermind):
                 guesses.append(attempt)
         return sorted(guesses)
 
-    def start_game(self, code=None):
+    def start_game(self, code=None, first_attempt=None):
 
         self.remaining = list(itertools.product(*[range(self.colors) for _ in range(self.pegs)]))
 
         code = code or random.choice(self.remaining)
         moves = 1
 
-        attempt = (0, 0, 1, 1)
+        attempt = first_attempt or tuple(random.randint(0, self.colors - 1) for _ in range(self.pegs))
         while True:
             hint = self.compare(code, attempt)
             if hint == (self.pegs, 0):
                 return code, moves
-            self.remaining = [k for k in self.remaining if self.compare(k, attempt) == hint]
+            self.remaining = list(filter(lambda x: self.compare(x, attempt) == hint, self.remaining))
             moves += 1
             attempt = None
             options = self.minimal_value_knuth()
@@ -60,11 +60,12 @@ class KnuthAlgorithm(Mastermind):
 total = 0
 count = 0
 if __name__ == "__main__":
-    game = KnuthAlgorithm(6, 4)
-    codes = list(itertools.product(*[range(4, 6) for _ in range(4)]))
+    start = time.time()
+    game = KnuthAlgorithm(6, 3)
+    codes = list(itertools.product(*[range(6) for _ in range(3)]))
     for c in codes:
-        _, moves = game.start_game(c)
+        _, moves = game.start_game(c, (0, 0, 1))
         total += moves
         count += 1
-        print(f"{''.join(map(str, c))} found in {moves} moves")
+        print(f"{str().join(map(str, c))} found in {moves} moves")
 print(total/count)

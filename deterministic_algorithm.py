@@ -3,7 +3,7 @@ import itertools
 from util import Mastermind
 
 
-class RandomAlgorithm(Mastermind):
+class DeterministicAlgorithm(Mastermind):
 
     def __init__(self, colors, pegs):
         super().__init__(colors, pegs)
@@ -14,18 +14,24 @@ class RandomAlgorithm(Mastermind):
         code = code or random.choice(remaining)
         moves = 1
 
-        attempt = first_attempt or random.choice(remaining)
+        attempt = first_attempt or remaining[0]
         while True:
             hint = self.compare(code, attempt)
             if hint == (self.pegs, 0):
                 return code, moves
             remaining = list(filter(lambda x: self.compare(x, attempt) == hint, remaining))
             moves += 1
-            attempt = random.choice(remaining)
+            attempt = remaining[0]
 
 
-game = RandomAlgorithm(6, 4)
+total = 0
+count = 0
 if __name__ == "__main__":
-    c, m = game.start_game()
-    print(f"Code: {c}")
-    print(f"Found in {m} moves")
+    game = DeterministicAlgorithm(6, 4)
+    codes = list(itertools.product(*[range(6) for _ in range(4)]))
+    for c in codes:
+        _, moves = game.start_game(c)
+        total += moves
+        count += 1
+        print(f"{str().join(map(str, c))} found in {moves} moves")
+print(total/count)
