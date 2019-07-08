@@ -1,6 +1,8 @@
 import random
 import itertools
 from util import Mastermind
+from matplotlib import pyplot as plt
+import numpy as np
 
 
 class KnuthAlgorithm(Mastermind):
@@ -11,14 +13,14 @@ class KnuthAlgorithm(Mastermind):
         self.remaining = self.combinations.copy()
 
     def minimal_value_single_knuth(self, attempt):
-        hints = {}
+        feedbacks = {}
         for code in self.remaining:
-            hint = self.compare(code, attempt)
-            if hint not in hints:
-                hints[hint] = 1
+            feedback = self.compare(code, attempt)
+            if feedback not in feedbacks:
+                feedbacks[feedback] = 1
             else:
-                hints[hint] += 1
-        return max(hints.values())
+                feedbacks[feedback] += 1
+        return max(feedbacks.values())
 
     def minimal_value_knuth(self):
 
@@ -35,17 +37,17 @@ class KnuthAlgorithm(Mastermind):
 
     def start_game(self, code=None, first_attempt=None):
 
-        self.remaining = list(itertools.product(*[range(self.colors) for _ in range(self.pegs)]))
+        self.remaining = self.get_codes()
 
         code = code or random.choice(self.remaining)
         moves = 1
 
         attempt = first_attempt or tuple(random.randint(0, self.colors - 1) for _ in range(self.pegs))
         while True:
-            hint = self.compare(code, attempt)
-            if hint == (self.pegs, 0):
+            feedback = self.compare(code, attempt)
+            if feedback == (self.pegs, 0):
                 return code, moves
-            self.remaining = list(filter(lambda x: self.compare(x, attempt) == hint, self.remaining))
+            self.remaining = list(filter(lambda x: self.compare(x, attempt) == feedback, self.remaining))
             moves += 1
             attempt = None
             options = self.minimal_value_knuth()
@@ -57,15 +59,24 @@ class KnuthAlgorithm(Mastermind):
                 attempt = options[0]
 
 
-total = 0
-count = 0
 if __name__ == "__main__":
-    start = time.time()
-    game = KnuthAlgorithm(6, 3)
-    codes = list(itertools.product(*[range(6) for _ in range(3)]))
+    game = KnuthAlgorithm(4, 4)
+    codes = game.get_codes()
+
+    total = 0
+    count = len(codes)
+    results = []
     for c in codes:
-        _, moves = game.start_game(c, (0, 0, 1))
-        total += moves
-        count += 1
-        print(f"{str().join(map(str, c))} found in {moves} moves")
-print(total/count)
+        _, m = game.start_game(c, (0, 0, 2, 2))
+        print(f"{str().join(map(str, c))} found in {m} moves")
+        results.append(m)
+        total += m
+    print(f"{total}/{count} = {total/count}")
+    data = np.array(results)
+    d = np.diff(np.unique(data)).min()
+    left_of_first_bin = data.min() - float(d) / 2
+    right_of_last_bin = data.max() + float(d) / 2
+    plt.xlabel("Number of Moves")
+    plt.ylabel("Frequency")
+    plt.hist(data, np.arange(left_of_first_bin, right_of_last_bin + d, d), alpha=0.5)
+    plt.show()
