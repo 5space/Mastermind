@@ -60,7 +60,7 @@ class KnuthAlgorithm(Mastermind):
 
 
 if __name__ == "__main__":
-    game = KnuthAlgorithm(4, 4)
+    game = KnuthAlgorithm(6, 4)
     codes = game.get_codes()
 
     total = 0
